@@ -1,0 +1,14 @@
+import { useMemo, useState } from 'react';
+
+export default function Friends({ user, people, friendships, onAddFriend, onMessage }) {
+  const [query, setQuery] = useState('');
+  const connectedIds = new Set(friendships.map((item) => item.personId));
+  const visiblePeople = useMemo(() => people.filter((person) => person.id !== user.id && `${person.name} ${person.tagline}`.toLowerCase().includes(query.trim().toLowerCase())), [people, query, user.id]);
+  const friends = people.filter((person) => connectedIds.has(person.id));
+  return <main className="page-wrap standard-page"><div className="page-heading"><div><p className="eyebrow">GROW YOUR CIRCLE</p><h1>Friends<span className="heading-period">.</span></h1></div><span className="heading-date">{friends.length} connected</span></div>
+    <section className="discovery-section"><div className="section-title"><div><h2>People to know</h2><p>Demo profiles and members saved in this browser.</p></div><label className="search-box"><span aria-hidden="true">⌕</span><input type="search" value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Search people" aria-label="Search people" /></label></div>
+      {visiblePeople.length ? <ul className="people-grid">{visiblePeople.map((person) => { const connected = connectedIds.has(person.id); return <li className="person-row" key={person.id}><span className={`avatar avatar-${person.color || 'green'}`}>{person.name.slice(0, 1).toUpperCase()}</span><div className="person-info"><strong>{person.name}</strong><span>{person.tagline}</span>{person.id.startsWith('person-') && <small>Demo profile</small>}</div><div className="person-actions">{connected ? <button className="secondary-button" type="button" onClick={() => onMessage(person.id, person.name)}>Message <span aria-hidden="true">↗</span></button> : <button className="secondary-button" type="button" onClick={() => onAddFriend(person.id)}>Add friend <span aria-hidden="true">+</span></button>}</div></li>; })}</ul> : <p className="empty-state">No people match “{query.trim()}”.</p>}
+    </section>
+    <section className="connections-section"><div className="section-title"><div><h2>Your people</h2><p>People you have added.</p></div></div>{friends.length ? <ul className="people-grid friend-grid">{friends.map((person) => <li className="person-row" key={person.id}><span className={`avatar avatar-${person.color || 'green'}`}>{person.name.slice(0, 1).toUpperCase()}</span><div className="person-info"><strong>{person.name}</strong><span>{person.tagline}</span></div><button className="secondary-button" type="button" onClick={() => onMessage(person.id, person.name)}>Message <span aria-hidden="true">↗</span></button></li>)}</ul> : <p className="empty-state">Your circle is just getting started. Add someone above.</p>}</section>
+  </main>;
+}
